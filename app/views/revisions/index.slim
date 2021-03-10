@@ -21,7 +21,8 @@ div.content-container id="revisionsPage"
           th View
           -if display_compare
             th Compare previous
-          th Summary
+          -if GalleryConfig.storage.track_revisions
+            th Summary
       tbody
         -total_reviews_left = @notebook.reviews.length
         -(@revisions + [nil]).each_cons(2) do |rev, previous|
@@ -87,7 +88,7 @@ div.content-container id="revisionsPage"
                     span.hidden aria-hidden="true" #{"]"}
             -if rev.revtype == "metadata"
               td.empty-cell
-            -else
+            -elsif GalleryConfig.storage.track_revisions
               td.commit-message-cell
                 div.mouseoveredit
                   -if rev.commit_message != nil

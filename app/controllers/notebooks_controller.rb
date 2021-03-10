@@ -141,18 +141,22 @@ class NotebooksController < ApplicationController
     @tags = parse_tags
     populate_notebook
     errors = ""
-    summary = params[:summary].strip
-    if summary.length > 500
-      errors += "Change log was too long. Only accepts 500 characters and you submitted one that was #{summary.length} characters."
+    if GalleryConfig.storage.track_revisions
+      summary = params[:summary].strip
+      if summary.length > 500
+        errors += "Change log was too long. Only accepts 500 characters and you submitted one that was #{summary.length} characters."
+      end
     end
     if save_update && errors.length <= 0
       # Save the content and db record.
       @notebook.thread.subscribe(@user)
       revision = Revision.where(notebook_id: @notebook.id).last
-      if summary != nil
-        revision.commit_message = summary
-      else
-        revision.commit_message = "Notebook updated by #{@user.name} without description."
+      if GalleryConfig.storage.track_revisions
+        if summary != nil
+          revision.commit_message = summary
+        else
+          revision.commit_message = "Notebook updated by #{@user.name} without description."
+        end
       end
       revision.save!
       render json: { uuid: @notebook.uuid, friendly_url: notebook_path(@notebook) }
